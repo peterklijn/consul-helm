@@ -330,10 +330,11 @@ server:
   extraLabels: null
 
   # Extra annotations to attach to the server pods.
-  # This should be a multi-line YAML string.
+  # NOTE: The use of a YAML string is deprecated. Instead, set directly as a
+  # YAML map.
   # Example:
-  #   annotations: |
-  #     "annotation-key": "annotation-value"
+  #   annotations:
+  #     annotationKey: "annotation-value"
   annotations: null
 
   service:

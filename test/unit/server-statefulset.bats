@@ -392,7 +392,7 @@ load _helpers
   [ "${actual}" = "{}" ]
 }
 
-@test "server/StatefulSet: annotations can be set" {
+@test "server/StatefulSet: annotations can be set via string (deprecated)" {
   cd `chart_dir`
   local actual=$(helm template \
       -s templates/server-statefulset.yaml  \
@@ -421,6 +421,42 @@ load _helpers
       . | tee /dev/stderr |
       yq -r '.spec.template.metadata.annotations."consul.hashicorp.com/config-checksum"' | tee /dev/stderr)
   [ "${actual}" = 83df36fdaf1b4acb815f1764f9ff2782c520ca012511f282ba9c57a04401a239 ]
+}
+
+@test "server/StatefulSet: multiple annotations can be set via string (deprecated)" {
+  cd `chart_dir`
+  local actual=$(helm template \
+      -s templates/server-statefulset.yaml  \
+      --set 'server.annotations=foo: bar \
+baz: qux' \
+      . | tee /dev/stderr)
+  local actualFoo=$(echo "${actual}" | yq -r '.spec.template.metadata.annotations.foo' | tee /dev/stderr)
+  local actualBaz=$(echo "${actual}" | yq -r '.spec.template.metadata.annotations.baz' | tee /dev/stderr)
+  [ "${actualFoo}" = "bar" ]
+  [ "${actualBaz}" = "qux" ]
+}
+
+@test "server/StatefulSet: annotations can be set via YAML" {
+  cd `chart_dir`
+  local actual=$(helm template \
+      -s templates/server-statefulset.yaml  \
+      --set 'server.annotations.foo=bar' \
+      . | tee /dev/stderr |
+      yq -r '.spec.template.metadata.annotations.foo' | tee /dev/stderr)
+  [ "${actual}" = "bar" ]
+}
+
+@test "server/StatefulSet: multiple annotations can be set via YAML" {
+  cd `chart_dir`
+  local actual=$(helm template \
+      -s templates/server-statefulset.yaml  \
+      --set 'server.annotations.foo=bar' \
+      --set 'server.annotations.baz=qux' \
+      . | tee /dev/stderr)
+  local actualFoo=$(echo "${actual}" | yq -r '.spec.template.metadata.annotations.foo' | tee /dev/stderr)
+  local actualBaz=$(echo "${actual}" | yq -r '.spec.template.metadata.annotations.baz' | tee /dev/stderr)
+  [ "${actualFoo}" = "bar" ]
+  [ "${actualBaz}" = "qux" ]
 }
 
 #--------------------------------------------------------------------
